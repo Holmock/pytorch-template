@@ -59,6 +59,8 @@ class BaseTrainer:
         Full training logic
         """
         not_improved_count = 0
+        best_epoch = 1
+        best_log = {}
         for epoch in range(self.start_epoch, self.epochs + 1):
             result = self._train_epoch(epoch)
 
@@ -87,6 +89,8 @@ class BaseTrainer:
                     self.mnt_best = log[self.mnt_metric]
                     not_improved_count = 0
                     best = True
+                    best_epoch = epoch
+                    best_log = log
                 else:
                     not_improved_count += 1
 
@@ -97,6 +101,10 @@ class BaseTrainer:
 
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
+
+        self.logger.info("Best epoch is {}.".format(best_epoch))
+        for key, value in best_log.items():
+            self.logger.info('    {:15s}: {}'.format(str(key), value))
 
     def _save_checkpoint(self, epoch, save_best=False):
         """
